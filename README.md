@@ -1,1 +1,1 @@
-# MyParking
+Hospital Management System
