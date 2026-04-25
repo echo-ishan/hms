@@ -1,0 +1,2 @@
+user_id,username,appointment_id,appointment_date,consulting_doctor,visit_reason,diagnosis,treatment,tests_requested,next_visit_date,notes
+6,Ishan,4,2026-04-13T09:00:00,Dr. Prashanth,cold,no problem,nothing,nothing,,take rest

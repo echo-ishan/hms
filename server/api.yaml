@@ -1,0 +1,679 @@
+openapi: 3.0.3
+info:
+  title: Hospital Management System API
+  version: 1.0.0
+  description: |
+    Role-based API for Hospital Management System (HMS).
+    Authentication uses JWT Bearer tokens.
+servers:
+  - url: http://127.0.0.1:5000
+    description: Local development
+
+tags:
+  - name: Auth
+  - name: Admin
+  - name: Doctor
+  - name: Patient
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        msg:
+          type: string
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+        type:
+          type: string
+          enum: [admin, doctor, patient]
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+
+    Department:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+
+    Doctor:
+      allOf:
+        - $ref: '#/components/schemas/User'
+        - type: object
+          properties:
+            name:
+              type: string
+            department_id:
+              type: integer
+              nullable: true
+            department_name:
+              type: string
+              nullable: true
+            license_number:
+              type: string
+              nullable: true
+            contact_number:
+              type: string
+              nullable: true
+            years_experience:
+              type: integer
+              nullable: true
+            bio:
+              type: string
+              nullable: true
+
+    Patient:
+      allOf:
+        - $ref: '#/components/schemas/User'
+        - type: object
+          properties:
+            name:
+              type: string
+            dob:
+              type: string
+              format: date
+            blood_group:
+              type: string
+              nullable: true
+            gender:
+              type: string
+              nullable: true
+            past_medical_history:
+              type: string
+              nullable: true
+            contact_number:
+              type: string
+            emergency_contact:
+              type: string
+              nullable: true
+            address:
+              type: string
+              nullable: true
+
+    Appointment:
+      type: object
+      properties:
+        id:
+          type: integer
+        doctor_id:
+          type: integer
+        patient_id:
+          type: integer
+        doctor_name:
+          type: string
+          nullable: true
+        patient_name:
+          type: string
+          nullable: true
+        start_time:
+          type: string
+          format: date-time
+        end_time:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [booked, completed, cancelled]
+        visit_reason:
+          type: string
+          nullable: true
+        diagnosis:
+          type: string
+          nullable: true
+        prescription:
+          type: string
+          nullable: true
+        tests_requested:
+          type: string
+          nullable: true
+        medications_prescribed:
+          type: string
+          nullable: true
+        follow_up_date:
+          type: string
+          format: date
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+
+paths:
+  /api/auth/register:
+    post:
+      tags: [Auth]
+      summary: Register a patient
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password, name, dob, contact_number]
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+                name:
+                  type: string
+                dob:
+                  type: string
+                  format: date
+                contact_number:
+                  type: string
+      responses:
+        '201':
+          description: Patient created
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/auth/login:
+    post:
+      tags: [Auth]
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Authenticated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  refresh_csrf:
+                    type: string
+                  user:
+                    $ref: '#/components/schemas/User'
+
+  /api/auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Refresh access token
+      responses:
+        '200':
+          description: Token refreshed
+
+  /api/auth/logout:
+    post:
+      tags: [Auth]
+      summary: Logout
+      responses:
+        '200':
+          description: Logged out
+
+  /api/auth/me:
+    get:
+      tags: [Auth]
+      summary: Current user
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Current user
+
+  /api/admin/stats:
+    get:
+      tags: [Admin]
+      summary: Admin dashboard counts
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Counts response
+
+  /api/admin/appointments:
+    get:
+      tags: [Admin]
+      summary: List/search/filter appointments
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: status
+          schema:
+            type: string
+        - in: query
+          name: q
+          schema:
+            type: string
+        - in: query
+          name: limit
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Appointments list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  appointments:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Appointment'
+
+  /api/admin/appointments/{appointment_id}:
+    patch:
+      tags: [Admin]
+      summary: Cancel booked appointment
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: appointment_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [cancelled]
+      responses:
+        '200':
+          description: Appointment updated
+
+  /api/admin/departments:
+    get:
+      tags: [Admin]
+      summary: List departments
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Department list
+    post:
+      tags: [Admin]
+      summary: Create department
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+      responses:
+        '201':
+          description: Department created
+
+  /api/admin/doctors:
+    get:
+      tags: [Admin]
+      summary: List doctors
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Doctor list
+    post:
+      tags: [Admin]
+      summary: Create doctor
+      security:
+        - bearerAuth: []
+      responses:
+        '201':
+          description: Doctor created
+
+  /api/admin/doctors/{doctor_id}:
+    get:
+      tags: [Admin]
+      summary: Get doctor
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: doctor_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Doctor details
+    patch:
+      tags: [Admin]
+      summary: Update doctor
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: doctor_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Doctor updated
+    delete:
+      tags: [Admin]
+      summary: Delete doctor
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: doctor_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Doctor deleted
+
+  /api/admin/patients:
+    get:
+      tags: [Admin]
+      summary: List patients
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Patient list
+    post:
+      tags: [Admin]
+      summary: Create patient
+      security:
+        - bearerAuth: []
+      responses:
+        '201':
+          description: Patient created
+
+  /api/admin/patients/{patient_id}:
+    get:
+      tags: [Admin]
+      summary: Get patient
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: patient_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Patient details
+    patch:
+      tags: [Admin]
+      summary: Update patient
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: patient_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Patient updated
+    delete:
+      tags: [Admin]
+      summary: Delete patient
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: patient_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Patient deleted
+
+  /api/doctor/me:
+    get:
+      tags: [Doctor]
+      summary: Doctor profile
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Doctor details
+
+  /api/doctor/availability:
+    get:
+      tags: [Doctor]
+      summary: List doctor availability
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Availability list
+    post:
+      tags: [Doctor]
+      summary: Create availability slot
+      security:
+        - bearerAuth: []
+      responses:
+        '201':
+          description: Availability created
+
+  /api/doctor/availability/{slot_id}:
+    delete:
+      tags: [Doctor]
+      summary: Delete availability slot
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: slot_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Slot deleted
+
+  /api/doctor/appointments:
+    get:
+      tags: [Doctor]
+      summary: List doctor appointments
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Appointment list
+
+  /api/doctor/appointments/{appointment_id}:
+    patch:
+      tags: [Doctor]
+      summary: Update appointment status/treatment details
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: appointment_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Appointment updated
+
+  /api/doctor/patient-history/{patient_id}:
+    get:
+      tags: [Doctor]
+      summary: Completed history for assigned patient
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: patient_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Patient history
+
+  /api/patient/me:
+    get:
+      tags: [Patient]
+      summary: Patient profile
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Patient profile
+    patch:
+      tags: [Patient]
+      summary: Update patient profile
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Patient updated
+
+  /api/patient/departments:
+    get:
+      tags: [Patient]
+      summary: List departments
+      responses:
+        '200':
+          description: Department list
+
+  /api/patient/doctors:
+    get:
+      tags: [Patient]
+      summary: List doctors
+      responses:
+        '200':
+          description: Doctor list
+
+  /api/patient/doctors/{doctor_id}:
+    get:
+      tags: [Patient]
+      summary: Get doctor details
+      parameters:
+        - in: path
+          name: doctor_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Doctor details
+
+  /api/patient/doctors/{doctor_id}/availability:
+    get:
+      tags: [Patient]
+      summary: Get doctor availability by date
+      parameters:
+        - in: path
+          name: doctor_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Availability list
+
+  /api/patient/appointments:
+    get:
+      tags: [Patient]
+      summary: List patient appointments
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Appointment list
+    post:
+      tags: [Patient]
+      summary: Book appointment
+      security:
+        - bearerAuth: []
+      responses:
+        '201':
+          description: Appointment booked
+
+  /api/patient/appointments/{appointment_id}:
+    patch:
+      tags: [Patient]
+      summary: Cancel appointment
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: appointment_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Appointment updated
+
+  /api/patient/exports/treatments:
+    post:
+      tags: [Patient]
+      summary: Trigger async treatment CSV export
+      security:
+        - bearerAuth: []
+      responses:
+        '202':
+          description: Export task accepted
+
+  /api/patient/exports/{task_id}:
+    get:
+      tags: [Patient]
+      summary: Poll export status
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: task_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Export status

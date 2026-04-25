@@ -1,0 +1,2 @@
+user_id,username,appointment_id,appointment_date,consulting_doctor,visit_reason,diagnosis,treatment,tests_requested,next_visit_date,notes
+2,Ayush Kumar,2,2026-04-13T10:00:00,Dr. Awashthi,teeth pain,noo problem,nothing,nothing,,all good

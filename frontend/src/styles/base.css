@@ -1,0 +1,110 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --color-primary: #1565a0;
+  --color-primary-hover: #0e4d7b;
+  --color-primary-subtle: #f0f7fc;
+  --color-success: #0e8c6a;
+  --color-success-light: #e4f5ef;
+  --color-warning: #c78b15;
+  --color-warning-light: #fdf5e3;
+  --color-danger: #c53030;
+  --color-danger-light: #fde8e8;
+  --color-bg: #f3f6fa;
+  --color-surface: #ffffff;
+  --color-text: #1a2332;
+  --color-text-secondary: #4d5b6e;
+  --color-text-muted: #8896a6;
+  --color-border: #dfe5ed;
+  --color-border-light: #eef1f5;
+  --sidebar-bg: #1a2332;
+  --sidebar-text: #a0aec0;
+  --sidebar-text-active: #ffffff;
+  --sidebar-active-bg: rgba(21, 101, 160, 0.2);
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+  --shadow-xs: 0 1px 2px rgba(26, 35, 50, 0.04);
+  --shadow-sm: 0 1px 3px rgba(26, 35, 50, 0.06), 0 1px 2px rgba(26, 35, 50, 0.04);
+  --shadow-md: 0 4px 8px rgba(26, 35, 50, 0.08);
+  --space-4: 4px;
+  --space-8: 8px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-20: 20px;
+  --space-24: 24px;
+  --font-size-xs: 12px;
+  --font-size-sm: 13px;
+  --font-size-md: 14px;
+  --font-size-lg: 16px;
+  --font-size-xl: 20px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: var(--font-size-md);
+  color: var(--color-text);
+  background: var(--color-bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+h1,
+h2,
+h3,
+h4,
+p {
+  margin: 0;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+.skip-link {
+  position: absolute;
+  left: 12px;
+  top: -100%;
+  z-index: 9999;
+  border-radius: var(--radius-md);
+  background: var(--color-primary);
+  color: #fff;
+  padding: 8px 12px;
+}
+
+.skip-link:focus {
+  top: 12px;
+}
+
+.top-accent {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #1565a0, #0e8c6a, #1565a0);
+  z-index: 1000;
+}
