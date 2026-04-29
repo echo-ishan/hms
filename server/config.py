@@ -12,9 +12,12 @@ class Config:
         "DATABASE_URL", f"sqlite:///{os.path.join(BASE_DIR, 'instance', 'hms.db')}"
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SQLALCHEMY_ENGINE_OPTIONS = {
-        "connect_args": {"timeout": 30},
-    }
+    _db_uri = SQLALCHEMY_DATABASE_URI or ""
+    if _db_uri.startswith("sqlite:"):
+        SQLALCHEMY_ENGINE_OPTIONS = {"connect_args": {"timeout": 30}}
+    else:
+        # psycopg2 uses `connect_timeout` (seconds); `timeout` is not a valid option for Postgres DSNs.
+        SQLALCHEMY_ENGINE_OPTIONS = {"connect_args": {"connect_timeout": 30}}
 
     JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY", "jwt-dev-secret-change-in-production")
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=30)
