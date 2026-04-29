@@ -69,6 +69,11 @@ Configured jobs:
 - Monthly doctor activity report on day 1 (for the previous month's completed visits).
 - Patient-triggered CSV export of completed treatment history.
 
+## Render (single free service)
+
+If you're using Render's free tier and don't have background workers, you can run the API + Celery worker/beat in
+the same web service using `server/start.sh:1` as the Render start command.
+
 ## Redis + Caching
 
 The backend uses Redis for:
