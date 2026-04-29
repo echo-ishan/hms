@@ -104,10 +104,13 @@ def _register_options_handler(flask_app):
 
 
 def _add_cors_headers(flask_app):
-    allowed_origins = {
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-    }
+    allowed_origins = {"http://localhost:5173", "http://127.0.0.1:5173"}
+    extra_origins = flask_app.config.get("CORS_ALLOWED_ORIGINS", "")
+    if extra_origins:
+        for origin in extra_origins.split(","):
+            origin = origin.strip()
+            if origin:
+                allowed_origins.add(origin)
 
     @flask_app.after_request
     def cors(response):

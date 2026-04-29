@@ -20,10 +20,14 @@ class Config:
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=30)
     JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=30)
     JWT_TOKEN_LOCATION = ["headers", "cookies"]
-    JWT_COOKIE_SECURE = False
     JWT_COOKIE_SAMESITE = os.environ.get("JWT_COOKIE_SAMESITE", "Lax")
     JWT_COOKIE_CSRF_PROTECT = True
     JWT_CSRF_IN_COOKIES = True
+    JWT_COOKIE_SECURE = os.environ.get("JWT_COOKIE_SECURE", "0") not in ("0", "false", "False")
+
+    # Comma-separated list of allowed origins. Example:
+    # CORS_ALLOWED_ORIGINS=https://your-frontend.vercel.app,https://your-custom-domain.com
+    CORS_ALLOWED_ORIGINS = os.environ.get("CORS_ALLOWED_ORIGINS", "")
 
     REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
 
@@ -50,3 +54,8 @@ class Config:
 
     # Mailpit defaults (dev): host=localhost port=1025 user/pass empty
     SMTP_USE_TLS = os.environ.get("SMTP_USE_TLS", "0") not in ("0", "false", "False")
+
+    # Email delivery mode:
+    # - smtp (default): deliver via SMTP settings above
+    # - log: don't send; log the email payload (good for public demos w/o credentials)
+    EMAIL_MODE = os.environ.get("EMAIL_MODE", "smtp").lower()
