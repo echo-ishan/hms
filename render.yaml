@@ -3,8 +3,8 @@ services:
     name: hms-api
     env: python
     rootDir: server
-    buildCommand: pip install uv && uv sync --frozen
-    startCommand: uv run gunicorn -w 2 -b 0.0.0.0:$PORT wsgi:app
+    buildCommand: pip install uv && uv sync
+    startCommand: uv run --active gunicorn -w 2 -b 0.0.0.0:$PORT wsgi:app
     healthCheckPath: /api/auth/me
     autoDeploy: true
     envVars:
@@ -37,8 +37,8 @@ services:
     name: hms-worker
     env: python
     rootDir: server
-    buildCommand: pip install uv && uv sync --frozen
-    startCommand: uv run celery -A worker.celery worker -l info -B
+    buildCommand: pip install uv && uv sync
+    startCommand: uv run --active celery -A worker.celery worker -l info -B
     autoDeploy: true
     envVars:
       - key: SECRET_KEY
