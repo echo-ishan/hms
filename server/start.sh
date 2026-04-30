@@ -17,13 +17,15 @@ if [[ -z "${PORT:-}" ]]; then
 fi
 
 echo "Starting gunicorn on :$PORT"
-uv run --active gunicorn -w 2 -b "0.0.0.0:${PORT}" wsgi:app &
+WEB_CONCURRENCY="${WEB_CONCURRENCY:-1}"
+uv run --active gunicorn -w "${WEB_CONCURRENCY}" -b "0.0.0.0:${PORT}" wsgi:app &
 PIDS+=("$!")
 
 echo "Starting celery worker+beat"
-uv run --active celery -A worker.celery worker -l info -B &
+CELERY_CONCURRENCY="${CELERY_CONCURRENCY:-1}"
+CELERY_POOL="${CELERY_POOL:-solo}"
+uv run --active celery -A worker.celery worker -l info -B --concurrency "${CELERY_CONCURRENCY}" --pool "${CELERY_POOL}" &
 PIDS+=("$!")
 
 wait -n
 exit $?
-
