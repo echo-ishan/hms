@@ -104,19 +104,22 @@ def _register_options_handler(flask_app):
 
 
 def _add_cors_headers(flask_app):
-    allowed_origins = {"http://localhost:5173", "http://127.0.0.1:5173"}
+    def _norm(origin: str) -> str:
+        return origin.strip().rstrip("/")
+
+    allowed_origins = {_norm("http://localhost:5173"), _norm("http://127.0.0.1:5173")}
     extra_origins = flask_app.config.get("CORS_ALLOWED_ORIGINS", "")
     if extra_origins:
         for origin in extra_origins.split(","):
-            origin = origin.strip()
+            origin = _norm(origin)
             if origin:
                 allowed_origins.add(origin)
 
     @flask_app.after_request
     def cors(response):
         origin = request.headers.get("Origin")
-        if origin in allowed_origins:
-            response.headers["Access-Control-Allow-Origin"] = origin
+        if origin and _norm(origin) in allowed_origins:
+            response.headers["Access-Control-Allow-Origin"] = _norm(origin)
         response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-CSRF-TOKEN"
         response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, PATCH, DELETE, OPTIONS"
         response.headers["Access-Control-Allow-Credentials"] = "true"
