@@ -227,6 +227,3 @@ If you plan to extend the project, good next steps include:
 - adding Swagger/OpenAPI docs
 - improving role-specific UI flows in the frontend
 
-## License
-
-Add a license file if you want to open source or distribute this project.
